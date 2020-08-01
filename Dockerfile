@@ -30,7 +30,7 @@ WORKDIR /source/hadolint
 RUN \
 	. /tmp/version.txt \
 	&& set -ex \
-	&& git clone https://github.com/hadolint/hadolint /source/hadolint \
+	&& git clone "https://github.com/hadolint/hadolint" /source/hadolint \
 	&& git checkout ${HADOLINT_COMMIT} \
 	&& mkdir -p \
 		/opt/upx \
@@ -125,4 +125,4 @@ FROM alpine:${ALPINE_VER}
 # add artifacts from compress stage
 COPY --from=compress-stage /build/hadolint /bin/
 
-CMD ["/bin/hadolint", "-"
+CMD ["/bin/hadolint", "-"]
