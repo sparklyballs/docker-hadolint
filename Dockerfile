@@ -31,7 +31,7 @@ RUN \
 	. /tmp/version.txt \
 	&& set -ex \
 	&& git clone "https://github.com/hadolint/hadolint" /source/hadolint \
-	&& git checkout ${HADOLINT_COMMIT} \
+	&& git checkout "${HADOLINT_COMMIT}" \
 	&& mkdir -p \
 		/opt/upx \
 	&& curl -o \
