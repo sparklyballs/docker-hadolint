@@ -86,10 +86,7 @@ RUN \
 	&& stack \
 		--install-ghc test \
 		--no-terminal \
-		--only-dependencies
-
-RUN \
-	set -ex \
+		--only-dependencies \
 	&& scripts/fetch_version.sh \
 	&& stack install \
 		--flag hadolint:static \
