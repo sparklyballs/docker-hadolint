@@ -57,6 +57,7 @@ RUN \
 		git \
 		libffi-dev \
 		libgmp-dev \
+		libtinfo-dev \
 		netbase \
 		zlib1g-dev \
 	&& curl -o \
