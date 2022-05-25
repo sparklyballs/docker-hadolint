@@ -1,4 +1,4 @@
-ARG UBUNTU_VER="focal"
+ARG UBUNTU_VER="jammy"
 ARG ALPINE_VER="edge"
 FROM alpine:${ALPINE_VER} as fetch-stage
 
