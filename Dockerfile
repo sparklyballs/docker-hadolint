@@ -1,4 +1,3 @@
-ARG UBUNTU_VER="jammy"
 ARG ALPINE_VER="edge"
 FROM alpine:${ALPINE_VER} as fetch-stage
 
@@ -31,46 +30,20 @@ RUN \
 	. /tmp/version.txt \
 	&& set -ex \
 	&& git clone "https://github.com/hadolint/hadolint" /source/hadolint \
-	&& git checkout "${HADOLINT_COMMIT}" \
-	&& mkdir -p \
-		/opt/upx \
-	&& curl -o \
-	/tmp/upx.tar.gz -L \
-	"https://github.com/upx/upx/releases/download/v${UPX_RELEASE}/upx-${UPX_RELEASE}-amd64_linux.tar.xz" \
-	&& tar xf \
-	/tmp/upx.tar.gz -C \
-	/opt/upx --strip-components=1  
+	&& git checkout "${HADOLINT_COMMIT}"
 	
-
-FROM ubuntu:${UBUNTU_VER} as packages-stage
+FROM alpine:${ALPINE_VER} as packages-stage
 
 ############## packages stage ##############
 
 # install build packages
 RUN \
-	apt-get update \
-	&& apt-get install -y \
-		--no-install-recommends \
-		build-essential \
-		ca-certificates \
-		curl \
+	apk add --no-cache \
+		cabal \
+		ghc \
 		git \
-		libffi-dev \
-		libgmp-dev \
-		libtinfo-dev \
-		netbase \
-		zlib1g-dev \
-	&& curl -o \
-	/tmp/haskell.sh -L \
-		"https://get.haskellstack.org" \
-	&& /bin/sh /tmp/haskell.sh \
-	\
-# cleanup
-	\
-	&& rm -rf \
-		/tmp/* \
-		/var/lib/apt/lists/* \
-		/var/tmp/*
+		musl-dev \
+		wget
 
 FROM  packages-stage as build-stage
 
@@ -84,33 +57,30 @@ WORKDIR /source/hadolint
 
 RUN \
 	set -ex \
-	&& stack \
-		--install-ghc test \
-		--no-terminal \
-		--only-dependencies \
-	&& scripts/fetch_version.sh \
-	&& stack install \
-		--flag hadolint:static \
-		--ghc-options="-fPIC" \
+	&& cabal update \
+	&& cabal configure \
+	&& cabal build \
+	&& cabal install \
 	&& mkdir -p \
 		/build \
-	&& cp /root/.local/bin/hadolint /build/
+	&& cp /root/.cabal/bin//hadolint /build/
 
-FROM ubuntu:${UBUNTU_VER} as compress-stage
+FROM alpine:${ALPINE_VER} as compress-stage
 
 ############## compress stage ##############
 
 # add artifacts from fetch and strip stages
 COPY --from=build-stage /build /build
-COPY --from=fetch-stage /opt/upx /opt/upx
 
-# set shell
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# install compress packages
+RUN \
+	apk add --no-cache \
+		upx
 
 # compress hadolint
 RUN \
 	set -ex \
-	&& /opt/upx/upx  \
+	&& upx  \
 		--best \
 		--ultra-brute \
 	/build/hadolint
