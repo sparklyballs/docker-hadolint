@@ -1,4 +1,4 @@
-ARG ALPINE_VER="edge"
+ARG ALPINE_VER="3.15"
 FROM alpine:${ALPINE_VER} as fetch-stage
 
 ############## fetch stage ##############
@@ -42,6 +42,7 @@ RUN \
 		cabal \
 		ghc \
 		git \
+		libffi-dev \
 		musl-dev \
 		wget
 
