@@ -1,37 +1,38 @@
-ARG ALPINE_VER="3.15"
+ARG ALPINE_VER="3.17"
 FROM alpine:${ALPINE_VER} as fetch-stage
 
 ############## fetch stage ##############
+
+# build args
+ARG RELEASE
 
 # install fetch packages
 RUN \
 	apk add --no-cache \
 		bash \
 		curl \
-		git \
-		xz 
+		jq
 
 # set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# fetch version file
+# fetch source
 RUN \
 	set -ex \
+	&& if [ -z ${RELEASE+x} ]; then \
+	RELEASE=$(curl -u "${SECRETUSER}:${SECRETPASS}" -sX GET "https://api.github.com/repos/hadolint/hadolint/commits/master" \
+	| jq -r ".sha"); \
+	fi \
+	&& RELEASE="${RELEASE:0:7}" \
+	&& mkdir -p \
+		/src/hadolint \
 	&& curl -o \
-	/tmp/version.txt -L \
-	"https://raw.githubusercontent.com/sparklyballs/versioning/master/version.txt"
+	/tmp/hadolint.tar.gz	-L \
+		"https://github.com/hadolint/hadolint/archive/${RELEASE}.tar.gz" \
+	&& tar xf \
+	/tmp/hadolint.tar.gz -C \
+	/src/hadolint --strip-components=1
 
-# set workdir
-WORKDIR /source/hadolint
-
-# fetch source code
-# hadolint ignore=SC1091
-RUN \
-	. /tmp/version.txt \
-	&& set -ex \
-	&& git clone "https://github.com/hadolint/hadolint" /source/hadolint \
-	&& git checkout "${HADOLINT_COMMIT}"
-	
 FROM alpine:${ALPINE_VER} as packages-stage
 
 ############## packages stage ##############
@@ -51,10 +52,10 @@ FROM  packages-stage as build-stage
 ############## build stage ##############
 
 # add artifacts from source stage
-COPY --from=fetch-stage /source /source
+COPY --from=fetch-stage /src /src
 
 # set workdir
-WORKDIR /source/hadolint
+WORKDIR /src/hadolint
 
 RUN \
 	set -ex \
@@ -87,11 +88,11 @@ RUN \
 	/build/hadolint
 
 
-FROM alpine:${ALPINE_VER}
+FROM scratch
 
 ############## runtime stage ##############
 
 # add artifacts from compress stage
-COPY --from=compress-stage /build/hadolint /bin/
+COPY --from=compress-stage --chmod=777 /build/hadolint /bin/hadolint
 
 CMD ["/bin/hadolint", "-"]
