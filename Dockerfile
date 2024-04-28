@@ -46,7 +46,6 @@ RUN \
 	/tmp/gmp.tar.lz -C \
 	/src/gmp --strip-components=1
 
-
 FROM alpine:${ALPINE_VER} as packages-stage
 
 ############## packages stage ##############
