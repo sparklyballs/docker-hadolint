@@ -80,9 +80,9 @@ RUN apk add --no-cache \
 
 RUN \
 	./configure \
-		--build=$CBUILD \
-		--host=$CHOST \
-		--with-sysroot=$CBUILDROOT \
+		--build="$CBUILD" \
+		--host="$CHOST" \
+		--with-sysroot="$CBUILDROOT" \
 		--prefix=/usr \
 		--infodir=/usr/share/info \
 		--mandir=/usr/share/man \

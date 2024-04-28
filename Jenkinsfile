@@ -42,7 +42,7 @@ steps {
 	sh ('curl -o linting-script.sh -L https://raw.githubusercontent.com/sparklyballs/versioning/master/linting-script.sh')
 	sh ('/bin/bash linting-script.sh')
 	recordIssues enabledForFailure: true, tool: hadoLint(pattern: 'hadolint-result.xml')	
-	recordIssues enabledForFailure: true, tool: checkStyle(pattern: 'hadolint-result.xml')	
+	recordIssues enabledForFailure: true, tool: checkStyle(pattern: 'shellcheck-result.xml')	
 	}
 	}
 
