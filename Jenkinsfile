@@ -25,7 +25,7 @@ steps {
 script{
 	env.RELEASE_VER = sh(script: 'curl -sX GET "https://api.github.com/repos/${GITHUB_RELEASE_URL_SUFFIX}" | jq -r ".sha"', returnStdout: true).trim() 
 	env.RELEASE_VER = "$RELEASE_VER"[0..7]
-        env.GPM_RELEASE_VER = sh(script: 'curl -s "https://gmplib.org/#DOWNLOAD" | grep lz | grep -oE '[0-9]+([.][0-9]+)+([.][0-9]+)?' | head -n 1' returnStdout: true).trim()
+        env.GPM_RELEASE_VER = sh(script: 'curl -s "https://gmplib.org/#DOWNLOAD" | grep lz | grep -oE '[0-9]+([.][0-9]+)+([.][0-9]+)?' | head -n 1', returnStdout: true).trim()
 	}
 	}
 	}
