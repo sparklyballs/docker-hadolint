@@ -63,7 +63,8 @@ RUN \
 		m4 \
 		musl-dev \
 		texinfo \
-		wget
+		wget \
+		zlib-dev
 
 FROM  packages-stage as build-stage
 
